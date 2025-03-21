@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const participantsList = document.getElementById("participants-list");
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <p><strong>Participants:</strong> ${details.participants.join(", ") || "None"}</p>
         `;
 
         activitiesList.appendChild(activityCard);
@@ -38,6 +40,33 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
       console.error("Error fetching activities:", error);
+    }
+  }
+
+  // Function to fetch participants for each activity
+  async function fetchParticipants() {
+    try {
+      const response = await fetch("/participants");
+      const participants = await response.json();
+
+      // Clear loading message
+      participantsList.innerHTML = "";
+
+      // Populate participants list
+      Object.entries(participants).forEach(([activity, participants]) => {
+        const participantCard = document.createElement("div");
+        participantCard.className = "participant-card";
+
+        participantCard.innerHTML = `
+          <h4>${activity}</h4>
+          <p><strong>Participants:</strong> ${participants.join(", ") || "None"}</p>
+        `;
+
+        participantsList.appendChild(participantCard);
+      });
+    } catch (error) {
+      participantsList.innerHTML = "<p>Failed to load participants. Please try again later.</p>";
+      console.error("Error fetching participants:", error);
     }
   }
 
@@ -83,4 +112,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize app
   fetchActivities();
+  fetchParticipants();
 });
